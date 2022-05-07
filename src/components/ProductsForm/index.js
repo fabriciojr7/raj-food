@@ -49,12 +49,12 @@ export default function ProductsForm({ id, buttonLabel }) {
       const { data } = await ProductService.getProduct(id);
       setNome(data.nome);
       setDescricao(data.descricao);
-      setTipo(data.id_tipo_produto);
       setAtivo(data.ativo);
       setPrecoPadrao(data.preco_m);
       setPrecoPequena(data.preco_p);
       setPrecoGrande(data.preco_g);
       setSelectedFile(data.image);
+      setTipo(data.id_tipo_produto);
       tableSizeVisible(data.id_tipo_produto);
     } catch (err) {
       // console.log(err);
@@ -83,6 +83,15 @@ export default function ProductsForm({ id, buttonLabel }) {
     }
   };
 
+  const handleDescricaoChange = (e) => {
+    setDescricao(e.target.value);
+    if (!e.target.value) {
+      setError({ field: 'descricao', message: 'A descrição do produto é obrigatória.' });
+    } else {
+      removeError('descricao');
+    }
+  };
+
   const handleTypeProductChange = (e) => {
     setTipo(e.target.value);
     tableSizeVisible(e.target.value);
@@ -104,11 +113,11 @@ export default function ProductsForm({ id, buttonLabel }) {
       }
 
       if (id) {
-        await ProductService.updateProduct(id, dataProd);
-        // console.log(message);
+        const { message } = await ProductService.updateProduct(id, dataProd);
+        alert(message);
       } else {
-        await ProductService.createProduct(dataProd);
-        // console.log(message);
+        const { message } = await ProductService.createProduct(dataProd);
+        alert(message);
       }
       navigate('/adm/products');
     } catch (err) {
@@ -119,6 +128,7 @@ export default function ProductsForm({ id, buttonLabel }) {
   return (
     <Form onSubmit={handleSubmit}>
       {isLoading && <Loader />}
+
       <FormGrouping error={getErrorsMEssageByFieldName('nome')}>
         <Input
           error={getErrorsMEssageByFieldName('nome')}
@@ -128,11 +138,12 @@ export default function ProductsForm({ id, buttonLabel }) {
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
         <TextArea
+          error={getErrorsMEssageByFieldName('descricao')}
           placeholder="Descrição"
           value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
+          onChange={handleDescricaoChange}
         />
       </FormGrouping>
 

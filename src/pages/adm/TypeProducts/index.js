@@ -74,7 +74,7 @@ export default function TypeProducts() {
           urlNew="/adm/typeProducts/new"
           titleButton="Novo Tipo de produto"
           singularTitle="tipo de produto"
-          pluralTitle="tipo de produtos"
+          pluralTitle="tipos de produtos"
           array={filteredTypes}
         />
 

@@ -55,6 +55,15 @@ export default function TypeProductsForm({ id, buttonLabel }) {
     }
   };
 
+  const handleDescricaoChange = (e) => {
+    setDescricao(e.target.value);
+    if (!e.target.value) {
+      setError({ field: 'descricao', message: 'A descrição do produto é obrigatória.' });
+    } else {
+      removeError('descricao');
+    }
+  };
+
   const handleTemTamanhoChange = (e) => {
     setTemTamanho(e.target.value);
   };
@@ -69,11 +78,11 @@ export default function TypeProductsForm({ id, buttonLabel }) {
       };
 
       if (id) {
-        await TypeProductService.updateType(id, dataTypes);
-        // console.log(message);
+        const { message } = await TypeProductService.updateType(id, dataTypes);
+        alert(message);
       } else {
-        await TypeProductService.createType(dataTypes);
-        // console.log(message);
+        const { message } = await TypeProductService.createType(dataTypes);
+        alert(message);
       }
       navigate('/adm/typeProducts');
     } catch (err) {
@@ -94,11 +103,12 @@ export default function TypeProductsForm({ id, buttonLabel }) {
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
         <TextArea
+          error={getErrorsMEssageByFieldName('descricao')}
           placeholder="Descrição"
           value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
+          onChange={handleDescricaoChange}
         />
       </FormGrouping>
 
