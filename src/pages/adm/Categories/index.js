@@ -6,7 +6,7 @@ import {
   Container, Content, Search, Table,
 } from './styles';
 
-import ProductService from '../../../services/ProductService';
+import CategoriaService from '../../../services/CategoriaService';
 import MainHeader from '../components/MainHeader';
 import HeaderContent from '../components/HeaderContent';
 import InputSearch from '../../../components/InputSearch';
@@ -14,18 +14,18 @@ import ErrorList from '../../../components/ErrorList';
 import Loader from '../../../components/Loader';
 import { confirmeDeletAlert, errorAlert } from '../../../utils/showAlert';
 
-export default function Products() {
-  const [products, setProducts] = useState([]);
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+export default function Categories() {
+  const [types, setTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
-  const loadProducts = async () => {
+  const loadTypes = async () => {
     try {
       setIsLoading(true);
-      const { data } = await ProductService.listProducts();
+      const { data } = await CategoriaService.listCategories();
       setHasError(false);
-      setProducts(data);
+      setTypes(data);
     } catch {
       setHasError(true);
     } finally {
@@ -34,12 +34,12 @@ export default function Products() {
   };
 
   useEffect(() => {
-    loadProducts();
+    loadTypes();
   }, []);
 
-  const filteredProducts = useMemo(() => products.filter((product) => (
-    product.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  )), [products, searchTerm]);
+  const filteredTypes = useMemo(() => types.filter((type) => (
+    type.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  )), [types, searchTerm]);
 
   const handleChangeSearchTerm = (e) => {
     setSearchTerm(e.target.value);
@@ -48,21 +48,21 @@ export default function Products() {
   const handleRemove = async (id) => {
     try {
       setIsLoading(true);
-      await ProductService.deleteProduct(id);
-      loadProducts();
+      await CategoriaService.deleteCategory(id);
+      loadTypes();
       setIsLoading(true);
     } catch (err) {
-      errorAlert({ msg: `Erro ao excluir produto: ${err}` });
+      errorAlert({ msg: `Erro ao excluir categoria: ${err}` });
     }
   };
 
   return (
     <Container>
-      <MainHeader title="Produtos" />
+      <MainHeader title="Categorias" />
       {isLoading && <Loader />}
       <Search>
         <InputSearch
-          placeholder="Pesquisar produto pelo nome..."
+          placeholder="Pesquisar categoria pelo nome..."
           value={searchTerm}
           onChange={handleChangeSearchTerm}
         />
@@ -71,50 +71,45 @@ export default function Products() {
       <Content>
         <HeaderContent
           hasError={hasError}
-          urlNew="/adm/products/new"
-          titleButton="Novo produto"
-          singularTitle="produto"
-          pluralTitle="produtos"
-          array={filteredProducts}
+          urlNew="/adm/categories/new"
+          titleButton="Nova categoria"
+          singularTitle="categoria"
+          pluralTitle="categorias"
+          array={filteredTypes}
         />
 
-        {hasError && (<ErrorList descricao="Ocorreu um erro ao obter a lista de produtos" />)}
+        {hasError && (<ErrorList descricao="Ocorreu um erro ao obter a lista dos tipos de produtos" />)}
 
         <Table>
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Descrição</th>
-              <th>Ativo</th>
               <th> </th>
             </tr>
           </thead>
           <tbody>
             {
-              filteredProducts.map((product) => (
-                <tr key={product.id}>
-                  <td data-title="Nome:">{product.nome}</td>
-                  <td data-title="Descrição:" className="desc">{product.descricao}</td>
-                  <td data-title="Ativo:">{product.ativo ? 'Sim' : 'Não'}</td>
+              filteredTypes.map((type) => (
+                <tr key={type.id}>
+                  <td data-title="Nome">{type.nome}</td>
                   <td>
-                    <Link to={`/adm/products/edit/${product.id}`}>
+                    <Link to={`/adm/categories/edit/${type.id}`}>
                       <FaEdit className="edit" />
                     </Link>
+
                     <FaTrash
                       className="remove"
                       onClick={() => confirmeDeletAlert(
-                        { msg: 'Produto excluido com sucesso!' },
-                        () => handleRemove(product.id),
+                        { msg: 'Categoria excluido com sucesso!' },
+                        () => handleRemove(type.id),
                       )}
                     />
-
                   </td>
                 </tr>
               ))
             }
           </tbody>
         </Table>
-
       </Content>
     </Container>
   );

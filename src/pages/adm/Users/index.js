@@ -6,26 +6,26 @@ import {
   Container, Content, Search, Table,
 } from './styles';
 
-import ProductService from '../../../services/ProductService';
+import UserService from '../../../services/UserService';
 import MainHeader from '../components/MainHeader';
 import HeaderContent from '../components/HeaderContent';
 import InputSearch from '../../../components/InputSearch';
 import ErrorList from '../../../components/ErrorList';
 import Loader from '../../../components/Loader';
-import { confirmeDeletAlert, errorAlert } from '../../../utils/showAlert';
+import { errorAlert, confirmeDeletAlert } from '../../../utils/showAlert';
 
-export default function Products() {
-  const [products, setProducts] = useState([]);
+export default function Users() {
+  const [users, setUsers] = useState([]);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadProducts = async () => {
+  const loadUsers = async () => {
     try {
       setIsLoading(true);
-      const { data } = await ProductService.listProducts();
+      const { data } = await UserService.listUsers();
       setHasError(false);
-      setProducts(data);
+      setUsers(data);
     } catch {
       setHasError(true);
     } finally {
@@ -34,12 +34,12 @@ export default function Products() {
   };
 
   useEffect(() => {
-    loadProducts();
+    loadUsers();
   }, []);
 
-  const filteredProducts = useMemo(() => products.filter((product) => (
-    product.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  )), [products, searchTerm]);
+  const filteredUsers = useMemo(() => users.filter((user) => (
+    user.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  )), [users, searchTerm]);
 
   const handleChangeSearchTerm = (e) => {
     setSearchTerm(e.target.value);
@@ -48,21 +48,21 @@ export default function Products() {
   const handleRemove = async (id) => {
     try {
       setIsLoading(true);
-      await ProductService.deleteProduct(id);
-      loadProducts();
+      await UserService.deleteUser(id);
+      loadUsers();
       setIsLoading(true);
     } catch (err) {
-      errorAlert({ msg: `Erro ao excluir produto: ${err}` });
+      errorAlert({ msg: `Erro ao excluir usuário: ${err}` });
     }
   };
 
   return (
     <Container>
-      <MainHeader title="Produtos" />
+      <MainHeader title="Usuários" />
       {isLoading && <Loader />}
       <Search>
         <InputSearch
-          placeholder="Pesquisar produto pelo nome..."
+          placeholder="Pesquisar usuário pelo nome..."
           value={searchTerm}
           onChange={handleChangeSearchTerm}
         />
@@ -71,43 +71,43 @@ export default function Products() {
       <Content>
         <HeaderContent
           hasError={hasError}
-          urlNew="/adm/products/new"
-          titleButton="Novo produto"
-          singularTitle="produto"
-          pluralTitle="produtos"
-          array={filteredProducts}
+          urlNew="/adm/users/new"
+          titleButton="Novo usuário"
+          singularTitle="usuário"
+          pluralTitle="usuários"
+          array={filteredUsers}
         />
 
-        {hasError && (<ErrorList descricao="Ocorreu um erro ao obter a lista de produtos" />)}
+        {hasError && (<ErrorList descricao="Ocorreu um erro ao obter a lista de usuários" />)}
 
         <Table>
           <thead>
             <tr>
               <th>Nome</th>
-              <th>Descrição</th>
-              <th>Ativo</th>
+              <th>Sobrenome</th>
+              <th>E-mail</th>
               <th> </th>
             </tr>
           </thead>
           <tbody>
             {
-              filteredProducts.map((product) => (
-                <tr key={product.id}>
-                  <td data-title="Nome:">{product.nome}</td>
-                  <td data-title="Descrição:" className="desc">{product.descricao}</td>
-                  <td data-title="Ativo:">{product.ativo ? 'Sim' : 'Não'}</td>
+              filteredUsers.map((user) => (
+                <tr key={user.id}>
+                  <td data-title="Nome:">{user.nome}</td>
+                  <td data-title="Sobrenome:">{user.sobrenome}</td>
+                  <td data-title="E-mail:">{user.email}</td>
                   <td>
-                    <Link to={`/adm/products/edit/${product.id}`}>
+                    <Link to={`/adm/users/edit/${user.id}`}>
                       <FaEdit className="edit" />
                     </Link>
+
                     <FaTrash
                       className="remove"
                       onClick={() => confirmeDeletAlert(
-                        { msg: 'Produto excluido com sucesso!' },
-                        () => handleRemove(product.id),
+                        { msg: 'Usuário excluido com sucesso!' },
+                        () => handleRemove(user.id),
                       )}
                     />
-
                   </td>
                 </tr>
               ))

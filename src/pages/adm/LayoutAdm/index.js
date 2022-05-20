@@ -4,7 +4,7 @@ import {
   Container, Menu, Content, ContentContainer,
 } from './styles';
 
-import NavBar from '../../../components/NavBar';
+import NavBar from '../components/NavBar';
 
 export default function LayoutAdm() {
   return (

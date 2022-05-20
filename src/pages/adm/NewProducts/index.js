@@ -1,5 +1,5 @@
-import HeaderForm from '../../../components/HeaderForm';
-import ProductsForm from '../../../components/ProductsForm';
+import HeaderForm from '../components/HeaderForm';
+import ProductsForm from '../components/ProductsForm';
 import { Container } from './styles';
 
 export default function NewProducts() {
