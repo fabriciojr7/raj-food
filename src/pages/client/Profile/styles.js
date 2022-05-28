@@ -65,24 +65,23 @@ export const CartAddress = styled.li`
     font-size: 18px;
     font-weight: 500;
   }
-`
+`;
 
-
-export const  Actions = styled.div`
+export const Actions = styled.div`
   display: flex;
   align-items: center;
-`
+`;
 
-export const  Removed = styled.div`
+export const Removed = styled.div`
   margin-left: 6px;
   color: ${({ theme }) => theme.colors.red.main};
   cursor: pointer;
-`
+`;
 
-export const  Edit = styled.div`
+export const Edit = styled.div`
   margin-right: 6px;
   cursor: pointer;
   a{
     color: ${({ theme }) => theme.colors.primary.main};
-  }  
-`
+  }
+`;

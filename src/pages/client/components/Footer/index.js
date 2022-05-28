@@ -14,8 +14,6 @@ export default function Footer() {
           {' '}
           <small>Felipe</small>
         </Link>
-
-
       </p>
       <p>Copyright © 2022</p>
     </Container>
