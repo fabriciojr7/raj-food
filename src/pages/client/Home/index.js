@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 
+import { MdStore } from 'react-icons/md';
+
+import SettingsService from '../../../services/SettingsService';
 import ProductService from '../../../services/ProductService';
 import CategoriaService from '../../../services/CategoriaService';
 import CardProd from '../components/CardProd';
@@ -8,12 +11,13 @@ import ErrorList from '../../../components/ErrorList';
 import Loader from '../../../components/Loader';
 
 import {
-  AreaProd, Category, SearchProduct, Text, Box,
+  BgHome, Bg, Status, AreaProd, Category, SearchProduct, Text, Box,
 } from './styles';
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState([]);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +28,19 @@ export default function Home() {
       const { data } = await ProductService.listProducts();
       setHasError(false);
       setProducts(data);
+    } catch {
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await SettingsService.getSettings();
+      setHasError(false);
+      setSettings(data);
     } catch {
       setHasError(true);
     } finally {
@@ -45,6 +62,7 @@ export default function Home() {
   };
 
   useEffect(() => {
+    loadSettings();
     loadCategories();
     loadProducts();
   }, []);
@@ -55,6 +73,16 @@ export default function Home() {
 
   return (
     <>
+      <BgHome>
+        <Bg>
+          {settings.descricao}
+          <Status status={settings.aberto}>
+            <MdStore />
+            {settings.aberto ? 'Aberto' : 'Fechado'}
+          </Status>
+        </Bg>
+      </BgHome>
+
       <SearchProduct>
         <InputSearch
           placeholder="Pesquisar item no cardapio..."
@@ -63,7 +91,7 @@ export default function Home() {
         />
       </SearchProduct>
       {isLoading && <Loader />}
-      {hasError && (<ErrorList descricao="Ocorreu um erro ao obter a lista dos tipos de produtos" />)}
+      {hasError && (<ErrorList descricao="Ocorreu um erro ao obter o catálogo de produtos" />)}
       {
           categories.map((cat) => (
             <Category key={cat.id}>

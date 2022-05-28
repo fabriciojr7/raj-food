@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Form, ButtonContainer,
@@ -14,7 +14,7 @@ import FormGrouping from '../../../../components/FormGrouping';
 import Button from '../../../../components/Button';
 import { errorAlert, sucessAlert } from '../../../../utils/showAlert';
 
-export default function ClientForm({ id, buttonLabel }) {
+export default function ClientForm({ id }) {
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
   const [fone, setFone] = useState('');
@@ -29,6 +29,26 @@ export default function ClientForm({ id, buttonLabel }) {
   } = useErrors();
 
   const isFormValid = (nome && errors.length === 0);
+
+  const loadAddress = async () => {
+    try {
+      // setIsLoading(true);
+      const { data } = await ClientService.getClient(1);
+      // setHasError(false);
+      setNome(data.nome);
+      setSobrenome(data.sobrenome);
+      setFone(data.fone);
+      setEmail(data.email);
+    } catch {
+      // setHasError(true);
+    } finally {
+      // setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAddress();
+  }, []);
 
   const handleNomeChange = (e) => {
     setNome(e.target.value);
@@ -59,6 +79,15 @@ export default function ClientForm({ id, buttonLabel }) {
 
   const handlePhoneChange = (e) => {
     setFone(formatPhone(e.target.value));
+    if (!e.target.value) {
+      setError({ field: 'fone', message: 'O telefone é obrigatório.' });
+    } else {
+      removeError('fone');
+    }
+  };
+
+  const handleSenhaChange = (e) => {
+    setSenha(e.target.value);
   };
 
   const handleConfirmaSenhaChange = (e) => {
@@ -101,6 +130,7 @@ export default function ClientForm({ id, buttonLabel }) {
           placeholder="Nome *"
           value={nome}
           onChange={handleNomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
@@ -110,11 +140,13 @@ export default function ClientForm({ id, buttonLabel }) {
           placeholder="Sobrenome"
           value={sobrenome}
           onChange={handleSobrenomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('fone')}>
         <Input
+          error={getErrorsMEssageByFieldName('fone')}
           placeholder="Telefone"
           value={fone}
           onChange={handlePhoneChange}
@@ -137,7 +169,8 @@ export default function ClientForm({ id, buttonLabel }) {
           type="password"
           placeholder="Senha"
           value={senha}
-          onChange={(e) => setSenha(e.target.value)}
+          onChange={handleSenhaChange}
+          maxLength="64"
         />
       </FormGrouping>
 
@@ -148,11 +181,13 @@ export default function ClientForm({ id, buttonLabel }) {
           placeholder="Confirmar senha"
           value={confirmaSenha}
           onChange={handleConfirmaSenhaChange}
+          maxLength="64"
         />
       </FormGrouping>
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>{buttonLabel}</Button>
+        <Button type="submit" disabled={!isFormValid}>Salvar dados</Button>
       </ButtonContainer>
+
     </Form>
   );
 }

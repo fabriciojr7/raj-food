@@ -9,8 +9,8 @@ export const Container = styled.div`
 `;
 
 export const Content = styled.div`
-    margin-top: 32px;
-    width: 100%;
+  margin: 32px 0;
+  width: 100%;
 `;
 
 export const Search = styled.div`
@@ -117,8 +117,6 @@ export const Table = styled.table`
       justify-content: center;
       font-size: 18px;
     }
-
-
 
     .edit{
       margin-right: 16px;

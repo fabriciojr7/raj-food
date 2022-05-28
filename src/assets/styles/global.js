@@ -8,15 +8,20 @@ export default createGlobalStyle`
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-    html, body{
+    body{
       font-size: 16px;
       overflow-x: hidden;
+      background: ${({ theme }) => theme.colors.background};
     }
     a{
        text-decoration: none;
     }
     button{
       cursor: pointer;
+    }
+
+    li{
+      list-style: none;
     }
 
 `;

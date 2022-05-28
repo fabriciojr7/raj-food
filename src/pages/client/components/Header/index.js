@@ -6,21 +6,21 @@ import {
 } from './styles';
 
 import rajFood from '../../../../assets/images/rajfood.png';
-// import MenuItems from '../MenuItems';
+import MenuItems from '../MenuItems';
 
 export default function Header() {
   return (
     <HeaderContainer>
       <Container>
         <Logo>
-          <Link to="/adm/login">
+          <Link to="/">
             <img src={rajFood} alt="Logo Raj-Food" />
           </Link>
         </Logo>
 
         <UserOperations>
           <UserIdentification>
-            {/* <MenuItems /> */}
+            <MenuItems />
             {/* Acesse sua conta */}
           </UserIdentification>
 

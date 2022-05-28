@@ -15,11 +15,14 @@ import EditCategories from './pages/adm/EditCategories';
 import Users from './pages/adm/Users';
 import NewUSer from './pages/adm/NewUser';
 import EditUser from './pages/adm/EditUser';
+import Settings from './pages/adm/Settings';
 
 // Cliente
 import Layout from './pages/client/Layout';
 import Home from './pages/client/Home';
 import Profile from './pages/client/Profile';
+import Address from './pages/client/Address';
+import EditAddress from './pages/client/EditAddress';
 import LoginSignUpLayout from './pages/client/LoginSignUpLayout';
 import Login from './pages/client/Login';
 import SignUp from './pages/client/SignUp';
@@ -31,6 +34,8 @@ export default function MainRoutes() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/address" element={<Address />} />
+          <Route path="/profile/address/edit/:id" element={<EditAddress />} />
         </Route>
 
         <Route path="/login" element={<LoginSignUpLayout />}>
@@ -49,6 +54,7 @@ export default function MainRoutes() {
           <Route path="/adm/users" element={<Users />} />
           <Route path="/adm/users/new" element={<NewUSer />} />
           <Route path="/adm/users/edit/:id" element={<EditUser />} />
+          <Route path="/adm/settings" element={<Settings />} />
         </Route>
         <Route path="/adm/login" element={<AdmLogin />} />
 

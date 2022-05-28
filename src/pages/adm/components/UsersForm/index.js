@@ -66,7 +66,7 @@ export default function UsersForm({ id, buttonLabel }) {
     if (!e.target.value) {
       setError({ field: 'sobrenome', message: 'O sobrenome é obrigatório.' });
     } else {
-      removeError('descricao');
+      removeError('sobrenome');
     }
   };
 
@@ -81,6 +81,20 @@ export default function UsersForm({ id, buttonLabel }) {
 
   const handlePhoneChange = (e) => {
     setFone(formatPhone(e.target.value));
+    if (!e.target.value) {
+      setError({ field: 'fone', message: 'O telefone é obrigatório.' });
+    } else {
+      removeError('fone');
+    }
+  };
+
+  const handleSenhaChange = (e) => {
+    setSenha(e.target.value);
+    if (!e.target.value) {
+      setError({ field: 'senha', message: 'A senha é obrigatória.' });
+    } else {
+      removeError('senha');
+    }
   };
 
   const handleConfirmaSenhaChange = (e) => {
@@ -130,6 +144,7 @@ export default function UsersForm({ id, buttonLabel }) {
           placeholder="Nome *"
           value={nome}
           onChange={handleNomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
@@ -139,12 +154,14 @@ export default function UsersForm({ id, buttonLabel }) {
           placeholder="Sobrenome"
           value={sobrenome}
           onChange={handleSobrenomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('fone')}>
         <Input
-          placeholder="Telefone"
+          error={getErrorsMEssageByFieldName('fone')}
+          placeholder="Telefone *"
           value={fone}
           onChange={handlePhoneChange}
           maxLength="15"
@@ -155,18 +172,20 @@ export default function UsersForm({ id, buttonLabel }) {
         <Input
           type="email"
           error={getErrorsMEssageByFieldName('email')}
-          placeholder="E-mail"
+          placeholder="E-mail *"
           value={email}
           onChange={handleEmailChange}
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('senha')}>
         <Input
+          error={getErrorsMEssageByFieldName('senha')}
           type="password"
           placeholder="Senha"
           value={senha}
-          onChange={(e) => setSenha(e.target.value)}
+          onChange={handleSenhaChange}
+          maxLength="64"
         />
       </FormGrouping>
 
@@ -177,6 +196,7 @@ export default function UsersForm({ id, buttonLabel }) {
           placeholder="Confirmar senha"
           value={confirmaSenha}
           onChange={handleConfirmaSenhaChange}
+          maxLength="64"
         />
       </FormGrouping>
 

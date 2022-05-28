@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import {
-  MdViewQuilt, MdFastfood, MdRestaurantMenu, MdSupervisedUserCircle,
+  MdViewQuilt, MdFastfood, MdRestaurantMenu, MdSupervisedUserCircle, MdSettings,
 } from 'react-icons/md';
 
 import { Container, Logo, Menu } from './styles';
@@ -39,6 +39,13 @@ export default function NavBar(/* { closeMenu } */) {
           <li>
             <MdSupervisedUserCircle className="ico" />
             Usuários
+          </li>
+        </Link>
+
+        <Link to="/adm/settings">
+          <li>
+            <MdSettings className="ico" />
+            Restaurante
           </li>
         </Link>
       </Menu>

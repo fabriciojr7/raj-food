@@ -9,8 +9,8 @@ export const Container = styled.div`
 `;
 
 export const Content = styled.div`
-    margin-top: 32px;
-    width: 100%;
+  margin: 32px 0;
+  width: 100%;
 `;
 
 export const Search = styled.div`

@@ -24,7 +24,6 @@ export const Content = styled.main`
   min-height: 100vh;
   overflow-y: auto;
   padding: 0 16px;
-  background: ${({ theme }) => theme.colors.background};
 `;
 
 export const ContentContainer = styled.div`

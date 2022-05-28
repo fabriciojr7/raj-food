@@ -1,10 +1,9 @@
 import { Container, AreaPhoto, AreaInformation } from './styles';
 
-// import imgLanche from '../../../../assets/images/xtudo.jpg';
-
 function CardProd({
   func, nome, descricao, preco, imagem,
 }) {
+  const imgPadrao = 'https://images-ext-2.discordapp.net/external/vTUrHTFHZKTde-oPSsPaHkjCP_a0DRL2HhXa0LUOWk4/https/res.cloudinary.com/rajfood/image/upload/v1653433375/TKQZGZF_nmrmha.jpg';
   return (
     <Container onClick={func}>
       <AreaInformation>
@@ -21,7 +20,10 @@ function CardProd({
       </AreaInformation>
 
       <AreaPhoto>
-        <img src={imagem} alt="Imagem Produto" />
+        {imagem === null
+          ? <img src={imgPadrao} alt="Imagem Produto" />
+          : <img src={imagem} alt="Imagem Produto" />}
+
       </AreaPhoto>
     </Container>
   );

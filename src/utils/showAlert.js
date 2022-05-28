@@ -15,7 +15,7 @@ export const errorAlert = ({ msg }) => {
     title: 'Erro',
     text: msg,
     icon: 'error',
-    buton: 'OK',
+    showConfirmButton: false,
     timer: '2000',
   });
 };
@@ -32,11 +32,12 @@ export const confirmeDeletAlert = (msg, func) => {
   }).then((result) => {
     if (result.isConfirmed) {
       func();
-      Swal.fire(
-        'Excluido!',
-        msg,
-        'success',
-      );
+      Swal.fire({
+        title: 'Excluido!',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: '2000',
+      });
     }
   });
 };

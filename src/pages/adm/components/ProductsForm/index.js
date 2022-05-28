@@ -79,8 +79,22 @@ export default function ProductsForm({ id, buttonLabel }) {
     }
   };
 
+  const handlePrecoChange = (e) => {
+    setPreco(e.target.value);
+    if (!e.target.value) {
+      setError({ field: 'preco', message: 'O preço do produto é obrigatório.' });
+    } else {
+      removeError('preco');
+    }
+  };
+
   const handleTypeProductChange = (e) => {
     setCategoria(e.target.value);
+    if (e.target.value === 0) {
+      setError({ field: 'preco', message: 'A categoria é obrigatório.' });
+    } else {
+      removeError('preco');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -119,15 +133,17 @@ export default function ProductsForm({ id, buttonLabel }) {
           placeholder="Nome *"
           value={nome}
           onChange={handleNomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
       <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
         <TextArea
           error={getErrorsMEssageByFieldName('descricao')}
-          placeholder="Descrição"
+          placeholder="Descrição *"
           value={descricao}
           onChange={handleDescricaoChange}
+          maxLength="60"
         />
       </FormGrouping>
 
@@ -145,11 +161,12 @@ export default function ProductsForm({ id, buttonLabel }) {
         </Select>
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={getErrorsMEssageByFieldName('preco')}>
         <Input
+          error={getErrorsMEssageByFieldName('preco')}
           placeholder="Preco *"
           value={preco}
-          onChange={(e) => setPreco(e.target.value)}
+          onChange={handlePrecoChange}
         />
       </FormGrouping>
 

@@ -56,7 +56,9 @@ export default function CategoriesForm({ id, buttonLabel }) {
   const handleDescricaoChange = (e) => {
     setDescricao(e.target.value);
     if (!e.target.value) {
-      setError({ field: 'descricao', message: 'A descrição do produto é obrigatória.' });
+      setError({ field: 'descricao', message: 'A descrição da categoria é obrigatória.' });
+    } else if (e.target.value.length < 3) {
+      setError({ field: 'descricao', message: 'A descrição da categoria tem que ter pelo menos 3 caracteres.' });
     } else {
       removeError('descricao');
     }
@@ -92,6 +94,7 @@ export default function CategoriesForm({ id, buttonLabel }) {
           placeholder="Nome *"
           value={nome}
           onChange={handleNomeChange}
+          maxLength="60"
         />
       </FormGrouping>
 
@@ -101,6 +104,7 @@ export default function CategoriesForm({ id, buttonLabel }) {
           placeholder="Descrição"
           value={descricao}
           onChange={handleDescricaoChange}
+          maxLength="60"
         />
       </FormGrouping>
 

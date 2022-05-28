@@ -7,7 +7,7 @@ export const Form = styled.form`
 `;
 
 export const ButtonContainer = styled.div`
-  margin-top: 24px;
+  margin: 24px 0;
   button{
     width: 100%;
   }
