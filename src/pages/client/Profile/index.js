@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import ClientForm from '../components/ClientForm';
 import AddressService from '../../../services/AddressService';
 import Loader from '../../../components/Loader';
 
-import { FaEdit, FaTrash } from 'react-icons/fa';
-
 import {
   Container, Content, Line, ListAdresses, TitleAdresses,
-  CartAddress, Actions, Removed, Edit
+  CartAddress, Actions, Removed, Edit,
 } from './styles';
 
 import { confirmeDeletAlert, errorAlert } from '../../../utils/showAlert';
-
 
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +19,7 @@ export default function Profile() {
   const loadAddress = async () => {
     try {
       setIsLoading(true);
-      const { data } = await AddressService.listAddress()
+      const { data } = await AddressService.listAddress();
       // setHasError(false);
       setAddress(data);
     } catch {
@@ -35,7 +32,6 @@ export default function Profile() {
   useEffect(() => {
     loadAddress();
   }, []);
-
 
   const handleRemove = async (id) => {
     try {
@@ -64,13 +60,13 @@ export default function Profile() {
 
           <ul>
             {
-              address.map(addr => (
+              address.map((addr) => (
                 <CartAddress key={addr.id}>
                   <h4>{addr.descricao}</h4>
                   <Actions>
                     <Edit>
                       <Link to={`/profile/address/edit/${addr.id}`}>
-                        <FaEdit/>
+                        <FaEdit />
                       </Link>
                     </Edit>
                     <Removed>
@@ -85,8 +81,6 @@ export default function Profile() {
                 </CartAddress>
               ))
             }
-
-
 
           </ul>
 
