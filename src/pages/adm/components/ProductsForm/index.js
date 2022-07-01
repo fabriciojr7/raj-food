@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import useErrors from '../../../../hooks/useErrors';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 import { Form, ButtonContainer } from './styles';
 
@@ -16,33 +17,35 @@ import UploadDropZone from '../../UploadDropZone';
 import Loader from '../../../../components/Loader';
 import { sucessAlert, errorAlert } from '../../../../utils/showAlert';
 
+const schema = yup.object({
+  nome: yup.string().required('O nome é obrigatório.').min(3, 'O nome requer pelo menos 3 caracteres.'),
+  descricao: yup.string().required('A descrição é obrigatória.'),
+  categoria: yup.number().min(1, 'A categoria é obrigatória.'),
+  preco: yup.string().required('O preço é obrigatório.'),
+}).required();
+
 export default function ProductsForm({ id, buttonLabel }) {
-  const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [ativo, setAtivo] = useState(true);
-  const [categoria, setCategoria] = useState(0);
-  const [preco, setPreco] = useState(0);
-  const [typeProducts, setTypeProducts] = useState([]);
+  const [category, setCategory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
 
   const {
-    setError, removeError, getErrorsMEssageByFieldName, errors,
-  } = useErrors();
-
-  const isFormValid = (nome && errors.length === 0);
+    register, handleSubmit, formState: { errors }, setValue,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const getDataProduct = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data } = await ProductService.getProduct(id);
-      setNome(data.nome);
-      setDescricao(data.descricao);
-      setAtivo(data.ativo);
-      setPreco(data.preco);
+      setValue('nome', data.nome);
+      setValue('descricao', data.descricao);
+      setValue('ativo', data.ativo);
+      setValue('preco', data.preco);
       setSelectedFile(data.image);
-      setCategoria(data.id_categoria);
+      setValue('categoria', data.id_categoria);
     } catch (err) {
       errorAlert({ msg: 'Erro ao buscar dados do produto' });
     } finally {
@@ -53,7 +56,7 @@ export default function ProductsForm({ id, buttonLabel }) {
   useEffect(() => {
     async function loadTypes() {
       const { data } = await CategoriaService.listCategories();
-      setTypeProducts(data);
+      setCategory(data);
     }
     loadTypes();
     if (id) {
@@ -61,51 +64,14 @@ export default function ProductsForm({ id, buttonLabel }) {
     }
   }, []);
 
-  const handleNomeChange = (e) => {
-    setNome(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'nome', message: 'Nome é obrigatório.' });
-    } else {
-      removeError('nome');
-    }
-  };
-
-  const handleDescricaoChange = (e) => {
-    setDescricao(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'descricao', message: 'A descrição do produto é obrigatória.' });
-    } else {
-      removeError('descricao');
-    }
-  };
-
-  const handlePrecoChange = (e) => {
-    setPreco(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'preco', message: 'O preço do produto é obrigatório.' });
-    } else {
-      removeError('preco');
-    }
-  };
-
-  const handleTypeProductChange = (e) => {
-    setCategoria(e.target.value);
-    if (e.target.value === 0) {
-      setError({ field: 'preco', message: 'A categoria é obrigatório.' });
-    } else {
-      removeError('preco');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const dataProd = new FormData();
-      dataProd.append('nome', nome);
-      dataProd.append('descricao', descricao);
-      dataProd.append('id_categoria', categoria);
-      dataProd.append('ativo', ativo);
-      dataProd.append('preco', preco);
+      dataProd.append('nome', data.nome);
+      dataProd.append('descricao', data.descricao);
+      dataProd.append('id_categoria', Number(data.categoria));
+      dataProd.append('ativo', data.ativo);
+      dataProd.append('preco', Number(data.preco));
       if (selectedFile) {
         dataProd.append('image', selectedFile);
       }
@@ -124,57 +90,51 @@ export default function ProductsForm({ id, buttonLabel }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit(onSubmit)}>
       {isLoading && <Loader />}
 
-      <FormGrouping error={getErrorsMEssageByFieldName('nome')}>
+      <FormGrouping error={errors.nome?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('nome')}
+          error={errors.nome?.message}
           placeholder="Nome *"
-          value={nome}
-          onChange={handleNomeChange}
-          maxLength="60"
+          {...register('nome')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
+      <FormGrouping error={errors.descricao?.message}>
         <TextArea
-          error={getErrorsMEssageByFieldName('descricao')}
+          error={errors.descricao?.message}
           placeholder="Descrição *"
-          value={descricao}
-          onChange={handleDescricaoChange}
-          maxLength="60"
+          {...register('descricao')}
         />
       </FormGrouping>
 
-      <FormGrouping>
+      <FormGrouping error={errors.categoria?.message}>
         <Select
-          value={categoria}
-          onChange={handleTypeProductChange}
+          {...register('categoria')}
+          error={errors.categoria?.message}
         >
           <option value={0}>Selecione a categoria do produto</option>
           {
-            typeProducts.map((type) => (
-              <option key={type.id} value={type.id}>{type.nome}</option>
+            category.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.nome}</option>
             ))
           }
         </Select>
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('preco')}>
+      <FormGrouping error={errors.preco?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('preco')}
+          error={errors.preco?.message}
           placeholder="Preco *"
-          value={preco}
-          onChange={handlePrecoChange}
+          {...register('preco')}
         />
       </FormGrouping>
 
       <FormGrouping>
         <p>Produto ativo</p>
         <Select
-          value={ativo}
-          onChange={(e) => setAtivo(e.target.value)}
+          {...register('ativo')}
         >
           <option value>Sim</option>
           <option value={false}>Não</option>
@@ -184,7 +144,7 @@ export default function ProductsForm({ id, buttonLabel }) {
       <UploadDropZone onFileUpload={setSelectedFile} filePro={selectedFile} />
 
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>{buttonLabel}</Button>
+        <Button type="submit">{buttonLabel}</Button>
       </ButtonContainer>
     </Form>
   );

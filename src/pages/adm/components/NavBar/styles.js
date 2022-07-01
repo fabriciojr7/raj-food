@@ -39,3 +39,21 @@ export const Menu = styled.ul`
     background: ${({ theme }) => theme.colors.primary.light};
   }
 `;
+
+export const Logout = styled.li`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  padding: 10px 0;
+  font-size: 20px;
+  margin-top: 40px;
+  cursor: pointer;
+  svg{
+    margin-right: 8px;
+  }
+  &:hover{
+    background: ${({ theme }) => theme.colors.primary.light};
+    color: ${({ theme }) => theme.colors.red.main};
+  }
+`;

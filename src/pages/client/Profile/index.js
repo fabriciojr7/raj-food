@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import ClientForm from '../components/ClientForm';
 import AddressService from '../../../services/AddressService';
 import Loader from '../../../components/Loader';
+import { AuthContext } from '../../../context/auth';
+import Title from '../components/Title';
 
 import {
   Container, Content, Line, ListAdresses, TitleAdresses,
@@ -15,11 +17,12 @@ import { confirmeDeletAlert, errorAlert } from '../../../utils/showAlert';
 export default function Profile() {
   const [isLoading, setIsLoading] = useState(true);
   const [address, setAddress] = useState([]);
+  const { client } = useContext(AuthContext);
 
   const loadAddress = async () => {
     try {
       setIsLoading(true);
-      const { data } = await AddressService.listAddress();
+      const { data } = await AddressService.listAddressClient(client.id);
       // setHasError(false);
       setAddress(data);
     } catch {
@@ -47,8 +50,9 @@ export default function Profile() {
   return (
     <Container>
       <Content>
+        <Title>Meu Perfil</Title>
         {isLoading && <Loader />}
-        <ClientForm />
+        <ClientForm id={client.id} />
         <Line />
         <ListAdresses>
           <TitleAdresses>
@@ -81,7 +85,6 @@ export default function Profile() {
                 </CartAddress>
               ))
             }
-
           </ul>
 
         </ListAdresses>

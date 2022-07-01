@@ -52,16 +52,38 @@ export const UserIdentification = styled.div`
 
 export const BotaoOperation = styled.div`
   cursor: pointer;
-  a{
+  svg{
     color: ${({ theme }) => theme.colors.red.main};
   }
   &:hover{
-    a{
+    svg{
       color: ${({ theme }) => theme.colors.red.light};
     }
   }
   &:active{
-    a{
+    svg{
+      color: ${({ theme }) => theme.colors.red.dark};
+    }
+  }
+`;
+
+export const BotaoCart = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 16px;
+  color: ${({ theme }) => theme.colors.red.main};
+  svg{
+    color: ${({ theme }) => theme.colors.red.main};
+  }
+  &:hover{
+    svg{
+      color: ${({ theme }) => theme.colors.red.light};
+    }
+  }
+  &:active{
+    svg{
       color: ${({ theme }) => theme.colors.red.dark};
     }
   }

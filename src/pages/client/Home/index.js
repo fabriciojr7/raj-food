@@ -1,4 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import {
+  useEffect, useState, useMemo,
+} from 'react';
 
 import { MdStore } from 'react-icons/md';
 
@@ -109,10 +111,8 @@ export default function Home() {
                     cat.id === prod.id_categoria ? (
                       <CardProd
                         key={prod.id}
-                        nome={prod.nome}
-                        descricao={prod.descricao}
-                        preco={prod.preco}
-                        imagem={prod.image}
+                        product={prod}
+                        restauranteIsOpened={settings.aberto}
                       />
                     ) : null
                   ))

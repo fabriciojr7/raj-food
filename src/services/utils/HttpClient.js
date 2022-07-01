@@ -6,7 +6,12 @@ class HttpClient {
   }
 
   async get(path) {
-    const response = await fetch(`${this.baseURL}${path}`);
+    const dataInit = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    };
+    const response = await fetch(`${this.baseURL}${path}`, dataInit);
 
     const body = await response.json();
 
@@ -21,7 +26,12 @@ class HttpClient {
   }
 
   async getById(path) {
-    const response = await fetch(`${this.baseURL}${path}`);
+    const dataInit = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    };
+    const response = await fetch(`${this.baseURL}${path}`, dataInit);
 
     const body = await response.json();
 
@@ -39,6 +49,7 @@ class HttpClient {
     const headers = header !== 'multipart/form-data' ? {
       headers: {
         'Content-Type': header,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     } : {};
     const dataInit = {
@@ -55,6 +66,7 @@ class HttpClient {
     const headers = header !== 'multipart/form-data' ? {
       headers: {
         'Content-Type': header,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     } : {};
     const dataInit = {
@@ -69,6 +81,9 @@ class HttpClient {
   async delete(path) {
     const dataInit = {
       method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     };
     const response = await fetch(`${this.baseURL}${path}`, dataInit);
     return response.json();

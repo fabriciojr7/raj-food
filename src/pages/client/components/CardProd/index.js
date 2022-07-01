@@ -1,29 +1,44 @@
-import { Container, AreaPhoto, AreaInformation } from './styles';
+import { useContext } from 'react';
+import {
+  Container, AreaPhoto, AreaInformation, AddCart,
+} from './styles';
 
-function CardProd({
-  func, nome, descricao, preco, imagem,
-}) {
+import { CartContext } from '../../../../context/cart';
+import { AuthContext } from '../../../../context/auth';
+
+function CardProd({ product, restauranteIsOpened }) {
+  const { addProductCart } = useContext(CartContext);
+  const { clientAuthenticated } = useContext(AuthContext);
+
   const imgPadrao = 'https://images-ext-2.discordapp.net/external/vTUrHTFHZKTde-oPSsPaHkjCP_a0DRL2HhXa0LUOWk4/https/res.cloudinary.com/rajfood/image/upload/v1653433375/TKQZGZF_nmrmha.jpg';
   return (
-    <Container onClick={func}>
+    <Container>
       <AreaInformation>
-        <h1>{nome}</h1>
+        <h1>{product.nome}</h1>
         <p>
-          {descricao}
+          {product.descricao}
         </p>
         <span>
           R$
           {' '}
-          {preco}
+          {product.preco}
           ,00
         </span>
+
+        {
+          restauranteIsOpened && clientAuthenticated ? (
+            <AddCart onClick={() => addProductCart(product)}>
+              Adicionar no carrinho
+            </AddCart>
+          ) : null
+}
+
       </AreaInformation>
 
       <AreaPhoto>
-        {imagem === null
-          ? <img src={imgPadrao} alt="Imagem Produto" />
-          : <img src={imagem} alt="Imagem Produto" />}
-
+        {product.image === null
+          ? <img src={imgPadrao} alt="Imagem Produtos" />
+          : <img src={product.image} alt="Imagem Produto" />}
       </AreaPhoto>
     </Container>
   );

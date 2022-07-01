@@ -1,49 +1,56 @@
-import { useState, useEffect, useCallback } from 'react';
+import {
+  useState, useEffect, useCallback, useContext,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
 import {
   Form, ButtonContainer,
 } from './styles';
 
-import useErrors from '../../../../hooks/useErrors';
-
+import { AuthContext } from '../../../../context/auth';
 import AddressService from '../../../../services/AddressService';
 import CepService from '../../../../services/CepService';
-import formatCep from '../../../../utils/formatCep';
 import Input from '../../../../components/Input';
 import FormGrouping from '../../../../components/FormGrouping';
 import Button from '../../../../components/Button';
 import Loader from '../../../../components/Loader';
 import { errorAlert, sucessAlert } from '../../../../utils/showAlert';
 
-export default function EnderecoForm({ id, buttonLabel }) {
-  const [descricao, setDescricao] = useState('');
-  const [cep, setCep] = useState('');
-  const [rua, setRua] = useState('');
-  const [numero, setNumero] = useState('');
-  const [bairro, setBairro] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+const schema = yup.object({
+  descricao: yup.string().required('A descrição é obrigatória.').min(3, 'O nome requer pelo menos 3 caracteres.'),
+  cep: yup.string().required('O CEP é obrigatório.'),
+  rua: yup.string().required('A rua é obrigatória.'),
+  numero: yup.string().required('O numero é obrigatório.'),
+  bairro: yup.string().required('O bairro é obrigatório.'),
+  cidade: yup.string().required('A cidade é obrigatória.'),
+  estado: yup.string().required('O estado é obrigatório.'),
+}).required();
 
+export default function EnderecoForm({ id, buttonLabel }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { client } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const {
-    setError, removeError, getErrorsMEssageByFieldName, errors,
-  } = useErrors();
-
-  const isFormValid = (descricao && errors.length === 0);
+    register, handleSubmit, formState: { errors }, setValue, setFocus,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const getDataType = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data } = await AddressService.getAddress(id);
-      setDescricao(data.descricao);
-      setCep(data.cep);
-      setRua(data.rua);
-      setNumero(data.numero);
-      setBairro(data.bairro);
-      setCidade(data.cidade);
-      setEstado(data.estado);
+      setValue('descricao', data.descricao);
+      setValue('cep', data.cep);
+      setValue('rua', data.rua);
+      setValue('numero', data.numero);
+      setValue('bairro', data.bairro);
+      setValue('cidade', data.cidade);
+      setValue('estado', data.estado);
     } catch (err) {
       errorAlert({ msg: 'Erro ao buscar dados do endereço' });
     } finally {
@@ -57,91 +64,36 @@ export default function EnderecoForm({ id, buttonLabel }) {
     }
   }, [getDataType, id]);
 
-  const handleDescricaoChange = (e) => {
-    setDescricao(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'descricao', message: 'A descrição é obrigatória.' });
-    } else {
-      removeError('descricao');
+  const chekCep = async (e) => {
+    const cep = e.target.value.replace(/\D/g, '');
+    if ((cep !== '') && (cep.length === 8)) {
+      try {
+        setIsLoading(true);
+        const data = await CepService.buscaCep(cep);
+        setValue('rua', data.logradouro);
+        setValue('bairro', data.bairro);
+        setValue('cidade', data.localidade);
+        setValue('estado', data.uf);
+        setFocus('numero');
+      } catch (err) {
+        errorAlert({ msg: 'Erro ao buscar dados do CEP' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleCepChange = (e) => {
-    setCep(formatCep(e.target.value));
-    if (!e.target.value) {
-      setError({ field: 'cep', message: 'O CEP é obrigatório.' });
-    } else {
-      removeError('cep');
-    }
-  };
-
-  const chekCep = async () => {
-    if (cep !== '') {
-      const data = await CepService.buscaCep(cep);
-      setRua(data.logradouro);
-      setBairro(data.bairro);
-      setCidade(data.localidade);
-      setEstado(data.uf);
-    }
-  };
-
-  const handleRuaChange = (e) => {
-    setRua(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'rua', message: 'A rua é obrigatória.' });
-    } else {
-      removeError('rua');
-    }
-  };
-
-  const handleNumeroChange = (e) => {
-    setNumero(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'numero', message: 'O número é obrigatório.' });
-    } else {
-      removeError('numero');
-    }
-  };
-
-  const handleBairrohange = (e) => {
-    setBairro(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'bairro', message: 'O bairro é obrigatório.' });
-    } else {
-      removeError('bairro');
-    }
-  };
-
-  const handleCidadeChange = (e) => {
-    setCidade(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'cidade', message: 'A cidade é obrigatória.' });
-    } else {
-      removeError('cidade');
-    }
-  };
-
-  const handleEstadoChange = (e) => {
-    setEstado(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'estado', message: 'O estado é obrigatório.' });
-    } else {
-      removeError('estado');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const dataEnd = {
-        id_cliente: 1,
-        descricao,
-        cep,
-        rua,
-        bairro,
-        cidade,
-        estado,
-        numero,
+        id_cliente: client.id,
+        descricao: data.descricao,
+        cep: data.cep,
+        rua: data.rua,
+        bairro: data.bairro,
+        cidade: data.cidade,
+        estado: data.estado,
+        numero: data.numero,
       };
 
       if (id) {
@@ -158,81 +110,67 @@ export default function EnderecoForm({ id, buttonLabel }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit(onSubmit)}>
       {isLoading && <Loader />}
-      <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
+      <FormGrouping error={errors.descricao?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('descricao')}
+          error={errors.descricao?.message}
           placeholder="Descrição exemplo: Endereço principal *"
-          value={descricao}
-          onChange={handleDescricaoChange}
-          maxLength="30"
+          {...register('descricao')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('cep')}>
+      <FormGrouping error={errors.cep?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('cep')}
+          error={errors.cep?.message}
           placeholder="CEP *"
-          value={cep}
-          onChange={handleCepChange}
+          {...register('cep')}
           onBlur={chekCep}
-          maxLength="9"
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('rua')}>
+      <FormGrouping error={errors.rua?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('rua')}
+          error={errors.rua?.message}
           placeholder="Rua *"
-          value={rua}
-          onChange={handleRuaChange}
-          maxLength="15"
+          {...register('rua')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('numero')}>
+      <FormGrouping error={errors.numero?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('numero')}
+          error={errors.numero?.message}
           placeholder="Número"
-          value={numero}
-          onChange={handleNumeroChange}
-          maxLength="20"
+          {...register('numero')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('bairro')}>
+      <FormGrouping error={errors.bairro?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('bairro')}
+          error={errors.bairro?.message}
           placeholder="Bairro *"
-          value={bairro}
-          onChange={handleBairrohange}
-          maxLength="60"
+          {...register('bairro')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('cidade')}>
+      <FormGrouping error={errors.cidade?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('cidade')}
+          error={errors.cidade?.message}
           placeholder="Cidade *"
-          value={cidade}
-          onChange={handleCidadeChange}
-          maxLength="60"
+          {...register('cidade')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('estado')}>
+      <FormGrouping error={errors.estado?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('estado')}
+          error={errors.estado?.message}
           placeholder="Estado *"
-          value={estado}
-          onChange={handleEstadoChange}
-          maxLength="30"
+          {...register('estado')}
         />
       </FormGrouping>
 
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>{buttonLabel}</Button>
+        <Button type="submit">{buttonLabel}</Button>
       </ButtonContainer>
 
       <ButtonContainer>

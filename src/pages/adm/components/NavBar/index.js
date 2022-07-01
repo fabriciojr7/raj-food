@@ -1,14 +1,25 @@
+import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 
+import { FaSignOutAlt } from 'react-icons/fa';
 import {
   MdViewQuilt, MdFastfood, MdRestaurantMenu, MdSupervisedUserCircle, MdSettings,
 } from 'react-icons/md';
+import { AuthContext } from '../../../../context/auth';
 
-import { Container, Logo, Menu } from './styles';
+import {
+  Container, Logo, Menu, Logout,
+} from './styles';
 
 import logo from '../../../../assets/images/rajfood.png';
 
-export default function NavBar(/* { closeMenu } */) {
+export default function NavBar() {
+  const { logoutAdm } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logoutAdm();
+  };
+
   return (
     <Container>
       <Logo>
@@ -48,6 +59,11 @@ export default function NavBar(/* { closeMenu } */) {
             Restaurante
           </li>
         </Link>
+        <Logout onClick={handleLogout}>
+          <FaSignOutAlt className="ico" />
+          Sair
+        </Logout>
+
       </Menu>
     </Container>
   );

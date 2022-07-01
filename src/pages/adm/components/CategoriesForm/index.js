@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import useErrors from '../../../../hooks/useErrors';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 import { Form, ButtonContainer } from './styles';
 
@@ -13,63 +14,45 @@ import Button from '../../../../components/Button';
 import Loader from '../../../../components/Loader';
 import { sucessAlert, errorAlert } from '../../../../utils/showAlert';
 
+const schema = yup.object({
+  nome: yup.string().required('O nome é obrigatório.').min(3, 'O nome requer pelo menos 3 caracteres.'),
+  descricao: yup.string().required('A descrição é obrigatória.'),
+}).required();
+
 export default function CategoriesForm({ id, buttonLabel }) {
-  const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
-    setError, removeError, getErrorsMEssageByFieldName, errors,
-  } = useErrors();
+    register, handleSubmit, formState: { errors }, setValue,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
-  const isFormValid = (nome && errors.length === 0);
-
-  const getDataType = useCallback(async () => {
+  const getDataType = async () => {
     try {
       setIsLoading(true);
       const { data } = await CategoriaService.getCategory(id);
-      setNome(data.nome);
-      setDescricao(data.descricao);
+      setValue('nome', data.nome);
+      setValue('descricao', data.descricao);
     } catch (err) {
       errorAlert({ msg: 'Erro ao buscar dados da categoria' });
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  };
 
   useEffect(() => {
     if (id) {
       getDataType();
     }
-  }, [getDataType, id]);
+  }, []);
 
-  const handleNomeChange = (e) => {
-    setNome(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'nome', message: 'Nome é obrigatório.' });
-    } else {
-      removeError('nome');
-    }
-  };
-
-  const handleDescricaoChange = (e) => {
-    setDescricao(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'descricao', message: 'A descrição da categoria é obrigatória.' });
-    } else if (e.target.value.length < 3) {
-      setError({ field: 'descricao', message: 'A descrição da categoria tem que ter pelo menos 3 caracteres.' });
-    } else {
-      removeError('descricao');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const dataTypes = {
-        nome,
-        descricao,
+        nome: data.nome,
+        descricao: data.descricao,
       };
       if (id) {
         await CategoriaService.updateCategory(id, dataTypes);
@@ -85,31 +68,27 @@ export default function CategoriesForm({ id, buttonLabel }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit(onSubmit)}>
       {isLoading && <Loader />}
 
-      <FormGrouping error={getErrorsMEssageByFieldName('nome')}>
+      <FormGrouping error={errors.nome?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('nome')}
           placeholder="Nome *"
-          value={nome}
-          onChange={handleNomeChange}
-          maxLength="60"
+          {...register('nome')}
+          error={errors.nome?.message}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
+      <FormGrouping error={errors.descricao?.message}>
         <TextArea
-          error={getErrorsMEssageByFieldName('descricao')}
           placeholder="Descrição"
-          value={descricao}
-          onChange={handleDescricaoChange}
-          maxLength="60"
+          {...register('descricao')}
+          error={errors.descricao?.message}
         />
       </FormGrouping>
 
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>{buttonLabel}</Button>
+        <Button type="submit">{buttonLabel}</Button>
       </ButtonContainer>
     </Form>
   );

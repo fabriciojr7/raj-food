@@ -6,7 +6,6 @@ export default function SignUpOrIn({ text, link }) {
     <Container>
       <Link to={link}>
         {text}
-
       </Link>
     </Container>
   );

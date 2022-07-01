@@ -5,8 +5,8 @@ class AddressService {
     this.httpClient = new HttpClient('https://rajfood-api.herokuapp.com/api');
   }
 
-  async listAddress() {
-    return this.httpClient.get('/endereco');
+  async listAddressClient(idClient) {
+    return this.httpClient.get(`/enderecoAlternativa/${idClient}`);
   }
 
   async getAddress(id) {

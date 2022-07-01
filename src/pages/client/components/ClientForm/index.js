@@ -1,113 +1,70 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
 import {
   Form, ButtonContainer,
 } from './styles';
 
-import useErrors from '../../../../hooks/useErrors';
-
 import ClientService from '../../../../services/ClientService';
-import isEmailValid from '../../../../utils/isEmailValid';
-import formatPhone from '../../../../utils/formatPhone';
 import Input from '../../../../components/Input';
 import FormGrouping from '../../../../components/FormGrouping';
 import Button from '../../../../components/Button';
+import Loader from '../../../../components/Loader';
 import { errorAlert, sucessAlert } from '../../../../utils/showAlert';
 
+const schema = yup.object({
+  nome: yup.string().required('O nome é obrigatório.').min(3, 'O nome requer pelo menos 3 caracteres.'),
+  sobrenome: yup.string().required('O sobrenome é obrigatório.'),
+  fone: yup.string().required('O telefone é obrigatório.'),
+  email: yup.string().email().required('O telefone é obrigatório.'),
+  senha: yup.string(),
+  confirmaSenha: yup.string().oneOf([yup.ref('senha')], 'As senhas devem ser iguais.'),
+}).required();
+
 export default function ClientForm({ id }) {
-  const [nome, setNome] = useState('');
-  const [sobrenome, setSobrenome] = useState('');
-  const [fone, setFone] = useState('');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmaSenha, setConfirmaSenha] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const {
-    setError, removeError, getErrorsMEssageByFieldName, errors,
-  } = useErrors();
+    register, handleSubmit, formState: { errors }, setValue,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
-  const isFormValid = (nome && errors.length === 0);
-
-  const loadAddress = async () => {
+  const loadClient = async () => {
     try {
-      // setIsLoading(true);
-      const { data } = await ClientService.getClient(1);
+      setIsLoading(true);
+      const { data } = await ClientService.getClient(id);
       // setHasError(false);
-      setNome(data.nome);
-      setSobrenome(data.sobrenome);
-      setFone(data.fone);
-      setEmail(data.email);
+      setValue('nome', data.nome);
+      setValue('sobrenome', data.sobrenome);
+      setValue('fone', data.fone);
+      setValue('email', data.email);
     } catch {
       // setHasError(true);
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadAddress();
+    if (id) {
+      loadClient();
+    }
   }, []);
 
-  const handleNomeChange = (e) => {
-    setNome(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'nome', message: 'Nome é obrigatório.' });
-    } else {
-      removeError('nome');
-    }
-  };
-
-  const handleSobrenomeChange = (e) => {
-    setSobrenome(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'sobrenome', message: 'O sobrenome é obrigatório.' });
-    } else {
-      removeError('sobrenome');
-    }
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-    if (e.target.value && !isEmailValid(e.target.value)) {
-      setError({ field: 'email', message: 'E-mail inválido.' });
-    } else {
-      removeError('email');
-    }
-  };
-
-  const handlePhoneChange = (e) => {
-    setFone(formatPhone(e.target.value));
-    if (!e.target.value) {
-      setError({ field: 'fone', message: 'O telefone é obrigatório.' });
-    } else {
-      removeError('fone');
-    }
-  };
-
-  const handleSenhaChange = (e) => {
-    setSenha(e.target.value);
-  };
-
-  const handleConfirmaSenhaChange = (e) => {
-    setConfirmaSenha(e.target.value);
-    if (e.target.value !== senha) {
-      setError({ field: 'confirmaSenha', message: 'A confirmação e a senha devem ser iguais.' });
-    } else {
-      removeError('confirmaSenha');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const dataCli = {
-        nome,
-        sobrenome,
-        fone,
-        email,
-        password: senha,
+        nome: data.nome,
+        sobrenome: data.sobrenome,
+        fone: data.fone,
+        email: data.email,
+        password: data.senha,
       };
 
       if (id) {
@@ -123,44 +80,38 @@ export default function ClientForm({ id }) {
     }
   };
   return (
-    <Form onSubmit={handleSubmit}>
-      <FormGrouping error={getErrorsMEssageByFieldName('nome')}>
+    <Form onSubmit={handleSubmit(onSubmit)}>
+      {isLoading && <Loader />}
+
+      <FormGrouping error={errors.nome?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('nome')}
+          error={errors.nome?.message}
           placeholder="Nome *"
-          value={nome}
-          onChange={handleNomeChange}
-          maxLength="60"
+          {...register('nome')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('sobrenome')}>
+      <FormGrouping error={errors.sobrenome?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('sobrenome')}
+          error={errors.sobrenome?.message}
           placeholder="Sobrenome"
-          value={sobrenome}
-          onChange={handleSobrenomeChange}
-          maxLength="60"
+          {...register('sobrenome')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('fone')}>
+      <FormGrouping error={errors.fone?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('fone')}
+          error={errors.fone?.message}
           placeholder="Telefone"
-          value={fone}
-          onChange={handlePhoneChange}
-          maxLength="15"
+          {...register('fone')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('email')}>
+      <FormGrouping error={errors.email?.message}>
         <Input
-          type="email"
-          error={getErrorsMEssageByFieldName('email')}
+          error={errors.email?.message}
           placeholder="E-mail"
-          value={email}
-          onChange={handleEmailChange}
+          {...register('email')}
         />
       </FormGrouping>
 
@@ -168,24 +119,20 @@ export default function ClientForm({ id }) {
         <Input
           type="password"
           placeholder="Senha"
-          value={senha}
-          onChange={handleSenhaChange}
-          maxLength="64"
+          {...register('senha')}
         />
       </FormGrouping>
 
-      <FormGrouping error={getErrorsMEssageByFieldName('confirmaSenha')}>
+      <FormGrouping error={errors.confirmaSenha?.message}>
         <Input
-          error={getErrorsMEssageByFieldName('confirmaSenha')}
+          error={errors.confirmaSenha?.message}
           type="password"
           placeholder="Confirmar senha"
-          value={confirmaSenha}
-          onChange={handleConfirmaSenhaChange}
-          maxLength="64"
+          {...register('confirmaSenha')}
         />
       </FormGrouping>
       <ButtonContainer>
-        <Button type="submit" disabled={!isFormValid}>Salvar dados</Button>
+        <Button type="submit">Salvar dados</Button>
       </ButtonContainer>
 
     </Form>

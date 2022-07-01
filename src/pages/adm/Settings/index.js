@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
 import {
   Container, Form, ButtonContainer,
 } from './styles';
-
-import useErrors from '../../../hooks/useErrors';
 
 import SettingsService from '../../../services/SettingsService';
 import Input from '../../../components/Input';
@@ -11,35 +14,39 @@ import TextArea from '../../../components/TextArea';
 import Button from '../../../components/Button';
 import FormGrouping from '../../../components/FormGrouping';
 import MainHeader from '../components/MainHeader';
-import formatPhone from '../../../utils/formatPhone';
+// import formatPhone from '../../../utils/formatPhone';
 import Loader from '../../../components/Loader';
 import { errorAlert, sucessAlert } from '../../../utils/showAlert';
 
-export default function Dashboard() {
-  const [nome, setNome] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [fone, setFone] = useState('');
-  const [endereco, setEndereco] = useState('');
-  const [taxa, setTaxa] = useState(0);
-  const [aberto, setAberto] = useState(false);
+const schema = yup.object({
+  nome: yup.string().required('O nome do restaurante é obrigatório.').min(3, 'O nome requer pelo menos 3 caracteres.'),
+  descricao: yup.string().required('A descricão é obrigatória.'),
+  fone: yup.string().required('O telefone é obrigatório.'),
+  endereco: yup.string().required('O endereço é obrigatório.'),
+  taxa: yup.number('O valor da entrega deve ser numérico'),
+}).required();
+
+export default function Settings() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    setError, removeError, getErrorsMEssageByFieldName, errors,
-  } = useErrors();
+  const navigate = useNavigate();
 
-  const isFormValid = (nome && errors.length === 0);
+  const {
+    register, handleSubmit, formState: { errors }, setValue,
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const getDataType = async () => {
     try {
       setIsLoading(true);
       const { data } = await SettingsService.getSettings();
-      setNome(data.nome);
-      setDescricao(data.descricao);
-      setFone(data.fone);
-      setEndereco(data.endereco);
-      setTaxa(data.valor_envio);
-      setAberto(data.aberto);
+      setValue('nome', data.nome);
+      setValue('descricao', data.descricao);
+      setValue('fone', data.fone);
+      setValue('endereco', data.endereco);
+      setValue('taxa', data.valor_envio);
+      setValue('aberto', data.aberto);
     } catch (err) {
       errorAlert({ msg: 'Erro ao buscar dados do restaurante' });
     } finally {
@@ -51,66 +58,21 @@ export default function Dashboard() {
     getDataType();
   }, []);
 
-  const handleNomeChange = (e) => {
-    setNome(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'nome', message: 'Nome é obrigatório.' });
-    } else {
-      removeError('nome');
-    }
-  };
-
-  const handleDescricaoChange = (e) => {
-    setDescricao(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'descricao', message: 'O Descriço é obrigatório.' });
-    } else {
-      removeError('descricao');
-    }
-  };
-
-  const handleEnderecoChange = (e) => {
-    setEndereco(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'endereco', message: 'O endereço é obrigatório.' });
-    } else {
-      removeError('endereco');
-    }
-  };
-
-  const handleFoneChange = (e) => {
-    setFone(formatPhone(e.target.value));
-    if (!e.target.value) {
-      setError({ field: 'fone', message: 'O telefone é obrigatório.' });
-    } else {
-      removeError('fone');
-    }
-  };
-
-  const handleTaxaChange = (e) => {
-    setTaxa(e.target.value);
-    if (!e.target.value) {
-      setError({ field: 'taxa', message: 'A taxa de entrega é obrigatória.' });
-    } else {
-      removeError('taxa');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const dataRestaurante = {
         id_cliente: 1,
-        nome,
-        descricao,
-        fone,
-        endereco,
-        valorEnvio: taxa,
-        aberto,
+        nome: data.nome,
+        descricao: data.descricao,
+        fone: data.fone,
+        endereco: data.endereco,
+        valorEnvio: data.taxa,
+        aberto: data.aberto,
       };
 
       await SettingsService.updateSettings(dataRestaurante);
       sucessAlert({ msg: 'Cadastro alterado com sucesso' });
+      navigate('/adm');
     } catch (err) {
       errorAlert({ msg: `Erro inesperado ${err}` });
     }
@@ -120,54 +82,50 @@ export default function Dashboard() {
     <Container>
       <MainHeader title="Configurações do restaurante" />
       {isLoading && <Loader />}
-      <Form onSubmit={handleSubmit}>
-        <FormGrouping error={getErrorsMEssageByFieldName('nome')}>
+
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <FormGrouping error={errors.nome?.message}>
           <Input
-            error={getErrorsMEssageByFieldName('nome')}
-            value={nome}
+            error={errors.nome?.message}
             placeholder="Nome do restaurante"
-            onChange={handleNomeChange}
+            {...register('nome')}
           />
         </FormGrouping>
 
-        <FormGrouping error={getErrorsMEssageByFieldName('descricao')}>
+        <FormGrouping error={errors.descricao?.message}>
           <TextArea
-            error={getErrorsMEssageByFieldName('descricao')}
-            value={descricao}
+            error={errors.descricao?.message}
             placeholder="Descrição ou slogan do restaurante"
-            onChange={handleDescricaoChange}
+            {...register('descricao')}
           />
         </FormGrouping>
 
-        <FormGrouping error={getErrorsMEssageByFieldName('fone')}>
+        <FormGrouping error={errors.fone?.message}>
           <Input
-            error={getErrorsMEssageByFieldName('fone')}
-            value={fone}
+            error={errors.fone?.message}
             placeholder="Telefone *"
-            onChange={handleFoneChange}
+            {...register('fone')}
           />
         </FormGrouping>
 
-        <FormGrouping error={getErrorsMEssageByFieldName('endereco')}>
+        <FormGrouping error={errors.endereco?.message}>
           <Input
-            error={getErrorsMEssageByFieldName('endereco')}
-            value={endereco}
+            error={errors.endereco?.message}
             placeholder="Endereço *"
-            onChange={handleEnderecoChange}
+            {...register('endereco')}
           />
         </FormGrouping>
 
-        <FormGrouping error={getErrorsMEssageByFieldName('taxa')}>
+        <FormGrouping error={errors.taxa?.message}>
           <Input
-            error={getErrorsMEssageByFieldName('taxa')}
-            value={taxa}
+            error={errors.taxa?.message}
             placeholder="Taxa de entrega *"
-            onChange={handleTaxaChange}
+            {...register('taxa')}
           />
         </FormGrouping>
 
         <ButtonContainer>
-          <Button type="submit" disabled={!isFormValid}>Salvar as configurações</Button>
+          <Button type="submit">Salvar as configurações</Button>
         </ButtonContainer>
       </Form>
     </Container>

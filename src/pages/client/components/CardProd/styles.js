@@ -12,10 +12,10 @@ export const Container = styled.div`
   transition: .2s ease-in transform;
   padding: 8px;
 
-  cursor: pointer;
+  /* cursor: pointer;
   &:hover{
     transform: scale(1.02);
-  }
+  } */
 
   @media only screen and (max-width: 600px){
     width: 100%;
@@ -61,7 +61,7 @@ export const AreaInformation = styled.div`
   display: flex;
   flex-direction: column;
   text-align: center;
-  margin-top: 16px;
+  margin-top: 10px;
   span{
     font-size: 16px;
     color: ${({ theme }) => theme.colors.gray[900]};
@@ -77,5 +77,21 @@ export const AreaInformation = styled.div`
     font-size: 14px;
     color: #616161;
     padding-bottom: 10px;
+  }
+`;
+
+export const AddCart = styled.div`
+  width: 100%;
+  padding: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid ${({ theme }) => theme.colors.primary.main};
+  background: ${({ theme }) => theme.colors.primary.main};
+  color: #fff;
+  border-radius: 20px;
+  cursor: pointer;
+
+  &:hover{
+    background: ${({ theme }) => theme.colors.primary.light};
   }
 `;
